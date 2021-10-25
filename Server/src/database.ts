@@ -9,16 +9,15 @@ const client = new Client({
 
 client.connect();
 
-const getQuestionsForProduct = async (page = '1', count = '5', productID) => {
+export const getQuestionsForProduct = async (page: string, count: string, productID: string) => {
   productID = productID.toString();
-  let queryString = 'SELECT * FROM questions WHERE product_id = $1 LIMIT $2';
+  let queryString = 'SELECT * FROM questions WHERE product_id = $3 LIMIT $2 OFFSET $1';
   try {
-    let questions = await client.query(queryString, [productID, count])
+    let questions = await client.query(queryString, [page, count, productID])
     // console.log(questions.rows);
     return questions.rows;
   } catch (err) {
     throw err;
-    return;
   }
 }
 

@@ -17,17 +17,18 @@ app.use(bodyParser.json());
 // required data from the server
 //GET REQUESTS
 app.get('/qa/questions', (req, res) => {
-    // console.log('req query', req.query);
     let count = req.query.count || 5;
-    let page = req.query.page || 1;
-    let product_id = String(req.query.product_id);
+    // let page = req.query.page || 1;
+    let product_id = req.query.product_id;
     (0, database_1.getQuestions)(product_id, count)
-        .then(questions => {
-        // console.log('this is questions in server', questions)
-        res.json(questions);
+        .then((questions) => {
+        const result = {
+            product_id,
+            results: questions.rows
+        };
+        res.json(result);
     })
-        .catch(err => {
-        console.log(err);
+        .catch((err) => {
         res.send(err);
     });
 });
@@ -36,9 +37,15 @@ app.get('/qa/questions/:question_id/answers', (req, res) => {
     let question_id = req.params.question_id;
     let count = req.query.page || 5;
     (0, database_1.getAnswers)(question_id, count)
-        .then(answers => {
+        .then((answers) => {
         // console.log('we are responding with answers', answers)
-        res.json(answers);
+        const result = {
+            question: question_id,
+            page: 1,
+            count,
+            results: answers.rows
+        };
+        res.json(result);
     })
         .catch((err) => {
         console.log(err);
@@ -73,11 +80,48 @@ app.post('/qa/questions/:question_id/answers', (req, res) => {
         console.log(err);
     });
 });
-//PUT REQUESTS
+//PUT REQUESTS HELPFUL
 app.put('/qa/questions/:question_id/helpful', (req, res) => {
-    const qHelpful = (0, database_1.putQuestionHelpful)(req.params.question_id);
-    console.log('is this helpful', qHelpful);
-    res.send(qHelpful);
+    (0, database_1.putQuestionHelpful)(req.params.question_id)
+        .then(posted => {
+        console.log('is this helpful', posted);
+        res.send(posted.command);
+    })
+        .catch(err => {
+        console.log(err);
+    });
+});
+app.put('/qa/answers/:answer_id/helpful', (req, res) => {
+    console.log('WE HERE DO');
+    (0, database_1.putAnswerHelpful)(req.params.answer_id)
+        .then(posted => {
+        console.log('is this helpful answer', posted.command);
+        res.send(posted.command);
+    })
+        .catch(err => {
+        console.log(err);
+    });
+});
+//PUT REQUESTS REPORT
+app.put('/qa/questions/:question_id/report', (req, res) => {
+    (0, database_1.putQuestionReport)(req.params.question_id)
+        .then(posted => {
+        console.log('is this report', posted);
+        res.send(posted.command);
+    })
+        .catch(err => {
+        console.log(err);
+    });
+});
+app.put('/qa/answers/:answer_id/report', (req, res) => {
+    (0, database_1.putAnswerReport)(req.params.answer_id)
+        .then(posted => {
+        console.log('is this report', posted);
+        res.send(posted.command);
+    })
+        .catch(err => {
+        console.log(err);
+    });
 });
 app.listen(8080, () => {
     console.log('We are connected to Q&A Server');

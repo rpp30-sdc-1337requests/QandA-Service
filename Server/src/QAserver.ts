@@ -13,7 +13,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 app.use(cors({
-    origin: 'http://localhost:3000'
+  origin: 'http://localhost:3000'
 }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json())
@@ -23,29 +23,36 @@ app.use(bodyParser.json())
 
 //GET REQUESTS
 app.get('/qa/questions', (req: Request, res: Response) => {
-  // console.log('req query', req.query);
   let count = req.query.count || 5;
-  let page = req.query.page || 1;
-  let product_id = String(req.query.product_id);
+  // let page = req.query.page || 1;
+  let product_id = req.query.product_id;
   getQuestions(product_id as string, count as number)
-    .then(questions => {
-      // console.log('this is questions in server', questions)
-      res.json(questions)
+    .then((questions: any) => {
+      const result = {
+        product_id,
+        results: questions.rows
+      }
+      res.json(result);
     })
-    .catch(err => {
-      console.log(err)
+    .catch((err: any) => {
       res.send(err)
     });
 })
 
 app.get('/qa/questions/:question_id/answers', (req: Request, res: Response) => {
   console.log('req stuff', req.params, req.query)
-  let question_id  = req.params.question_id;
+  let question_id = req.params.question_id;
   let count = req.query.page || 5;
   getAnswers(question_id as string, count as number)
-    .then (answers => {
+    .then((answers: any) => {
       // console.log('we are responding with answers', answers)
-      res.json(answers)
+      const result = {
+        question: question_id,
+        page: 1,
+        count,
+        results: answers.rows
+      }
+      res.json(result)
     })
     .catch((err: Error) => {
       console.log(err)
@@ -58,7 +65,7 @@ app.post('/qa/questions', (req: Request, res: Response) => {
   console.log('hitting post on server', req.body)
   let { body, name, email, product_id } = req.body.data;
   postQuestion(product_id as number, body as string, name as string, email as string)
-    .then ((question: { command: string }) => {
+    .then((question: { command: string }) => {
       console.log('we are responding with answers', question.command)
       res.json(question.command)
     })
@@ -74,7 +81,7 @@ app.post('/qa/questions/:question_id/answers', (req: Request, res: Response) => 
   let { question_id } = req.params;
   let photos: string = 'fakeURL';
   postAnswer(question_id, body, name, email, photos)
-    .then ((question: { command: string }) => {
+    .then((question: { command: string }) => {
       console.log('we are responding with answers', question)
       res.json(question)
     })
@@ -83,11 +90,51 @@ app.post('/qa/questions/:question_id/answers', (req: Request, res: Response) => 
     })
 })
 
-//PUT REQUESTS
+//PUT REQUESTS HELPFUL
 app.put('/qa/questions/:question_id/helpful', (req: Request, res: Response) => {
-  const qHelpful = putQuestionHelpful(req.params.question_id);
-  console.log('is this helpful', qHelpful)
-  res.send(qHelpful);
+  putQuestionHelpful(req.params.question_id)
+    .then(posted => {
+      console.log('is this helpful', posted)
+      res.send(posted.command);
+    })
+    .catch(err => {
+      console.log(err);
+    })
+})
+
+app.put('/qa/answers/:answer_id/helpful', (req: Request, res: Response) => {
+  console.log('WE HERE DO')
+  putAnswerHelpful(req.params.answer_id)
+    .then(posted => {
+      console.log('is this helpful answer', posted.command)
+      res.send(posted.command);
+    })
+    .catch(err => {
+      console.log(err);
+    })
+})
+
+//PUT REQUESTS REPORT
+app.put('/qa/questions/:question_id/report', (req: Request, res: Response) => {
+  putQuestionReport(req.params.question_id)
+    .then(posted => {
+      console.log('is this report', posted)
+      res.send(posted.command);
+    })
+    .catch(err => {
+      console.log(err);
+    })
+})
+
+app.put('/qa/answers/:answer_id/report', (req: Request, res: Response) => {
+  putAnswerReport(req.params.answer_id)
+    .then(posted => {
+      console.log('is this report', posted)
+      res.send(posted.command);
+    })
+    .catch(err => {
+      console.log(err);
+    })
 })
 
 

@@ -20,51 +20,32 @@ const client = new Client({
 });
 client.connect();
 //currently the way I have my DB queries setup, I am using 'then' blocks after async await, but I don't know how else to error handle
-const getQuestions = (productID, count) => __awaiter(void 0, void 0, void 0, function* () {
-    // productID = productID.toString();
-    const queryString = `WITH questionsJSON AS (
-      SELECT q.question_id, question_body, question_date, asker_name, q.reported, q.helpful,
-        (CASE WHEN (
-          string_agg(a.answer_id::varchar, ',' ORDER BY a.answer_id DESC)
-          ) IS NOT NULL THEN
-          jsonb_object_agg(a.answer_id::integer,
-            jsonb_build_object(
-              'id', a.answer_id,
-              'body', a.answer_body,
-              'date', a.answer_date,
-              'answerer_name', a.answerer_name,
-              'helpfulness', a.helpful,
-              'photos', COALESCE
-              (
-                (SELECT jsonb_agg(answer_photos.url)
-                FROM answer_photos
-                WHERE ap.answer_id = a.answer_id),
-                jsonb_build_array()
-              )
-            )
-          )
-        ELSE jsonb_build_array()
-        END) AS answers
-      FROM questions q
-      LEFT JOIN answers a
-      ON q.question_id = a.question_id
-      LEFT JOIN answer_photos ap
-      ON ap.answer_id = a.answer_id
-      WHERE q.product_id = $1 AND a.answer_id IS NOT NULL
-      AND q.reported = false
-      GROUP BY q.question_id
-      LIMIT $2)
-      SELECT *
-      FROM questionsJSON;`;
-    const questions = yield client.query(queryString, [productID, count]);
-    // console.log(questions.rows);
-    return {
-        product_id: productID,
-        results: questions.rows
-    };
-});
+const getQuestions = (productID, count) => {
+    const queryString = `SELECT q.question_id, question_body, question_date, asker_name, q.reported, q.helpful,
+  (
+    COALESCE (
+      jsonb_object_agg( a.answer_id,
+      jsonb_build_object(
+        'id', a.answer_id,
+        'body', a.answer_body,
+        'date', a.answer_date,
+        'answerer_name', a.answerer_name,
+        'helpfulness', a.helpful,
+        'photos', '[]'
+      )
+      )FILTER (WHERE a.answer_id IS NOT NULL AND a.reported = false),
+      '{}'::JSONB)
+  ) answers
+  FROM questions q
+  LEFT JOIN answers a
+  ON q.question_id = a.question_id
+  WHERE q.product_id = $1 AND q.reported = false
+  GROUP BY q.question_id
+  LIMIT $2;`;
+    return client.query(queryString, [productID, count]);
+};
 exports.getQuestions = getQuestions;
-const getAnswers = (questionID, count) => __awaiter(void 0, void 0, void 0, function* () {
+const getAnswers = (questionID, count) => {
     const queryString = `SELECT a.answer_id, a.answer_body AS body, a.answer_date AS date, a.answerer_name AS name, a.helpful AS helpfulness,
     (CASE WHEN string_agg(ap.url, ',') IS NOT NULL THEN
       jsonb_agg(
@@ -82,14 +63,8 @@ const getAnswers = (questionID, count) => __awaiter(void 0, void 0, void 0, func
     GROUP BY a.answer_id
     ORDER BY a.answer_id
     LIMIT $2;`;
-    const answers = yield client.query(queryString, [questionID, count]);
-    return {
-        question: questionID,
-        page: 1,
-        count,
-        results: answers.rows
-    };
-});
+    return client.query(queryString, [questionID, count]);
+};
 exports.getAnswers = getAnswers;
 const postQuestion = (productID, body, name, email) => {
     const queryString = 'INSERT INTO questions(product_id, question_body, asker_name, asker_email) \
@@ -110,43 +85,22 @@ const postAnswer = (questionID, body, name, email, photos) => {
 exports.postAnswer = postAnswer;
 const putQuestionHelpful = (questionID) => __awaiter(void 0, void 0, void 0, function* () {
     const queryString = 'UPDATE questions SET helpful = helpful + 1 WHERE questions.question_id = $1;';
-    try {
-        const putSuccess = yield client.query(queryString, [questionID]);
-        return putSuccess;
-    }
-    catch (err) {
-        console.log(err);
-    }
+    return client.query(queryString, [questionID]);
 });
 exports.putQuestionHelpful = putQuestionHelpful;
 const putQuestionReport = (questionID) => __awaiter(void 0, void 0, void 0, function* () {
     const queryString = 'UPDATE questions SET reported = true WHERE questions.question_id = $1;';
-    try {
-        const putSuccess = client.query(queryString, [questionID]);
-    }
-    catch (err) {
-        console.log(err);
-    }
+    return client.query(queryString, [questionID]);
 });
 exports.putQuestionReport = putQuestionReport;
 const putAnswerHelpful = (answerID) => __awaiter(void 0, void 0, void 0, function* () {
     const queryString = 'UPDATE answers SET helpful = helpful + 1 WHERE answers.answer_id = $1;';
-    try {
-        const putSuccess = yield client.query(queryString, [answerID]);
-    }
-    catch (err) {
-        console.log(err);
-    }
+    return client.query(queryString, [answerID]);
 });
 exports.putAnswerHelpful = putAnswerHelpful;
 const putAnswerReport = (answerID) => __awaiter(void 0, void 0, void 0, function* () {
     const queryString = 'UPDATE answers SET reported = true WHERE answers.answer_id = $1;';
-    try {
-        const putSuccess = client.query(queryString, [answerID]);
-    }
-    catch (err) {
-        console.log(err);
-    }
+    return client.query(queryString, [answerID]);
 });
 exports.putAnswerReport = putAnswerReport;
 module.exports = {
@@ -190,44 +144,24 @@ module.exports = {
 //   ON answer_photos.answer_id = a.answer_id
 //   WHERE answer_photos.answer_id = a.answer_id
 // ),
-// WITH questionsJSON AS (
 // SELECT q.question_id, question_body, question_date, asker_name, q.reported, q.helpful,
-//   (CASE WHEN (
-//     string_agg(a.answer_id::varchar, ',' ORDER BY a.answer_id DESC)
-//     ) IS NOT NULL THEN
-//     jsonb_object_agg(a.answer_id::integer,
-//       jsonb_build_object(
-//         'id', a.answer_id,
-//         'body', a.answer_body,
-//         'date', a.answer_date,
-//         'answerer_name', a.answerer_name,
-//         'helpfulness', a.helpful,
-//         'photos', COALESCE
-//         (
-//           (SELECT jsonb_agg(answer_photos.url)
-//           FROM answer_photos
-//           WHERE ap.answer_id = a.answer_id),
-//           jsonb_build_array()
-//         )
-//       )
-//     )
-//   ELSE jsonb_build_object()
-//   END) AS answers
+// (COALESCE(
+//   jsonb_object_agg( a.answer_id,
+//     jsonb_build_object(
+//       'id', a.answer_id,
+//       'body', a.answer_body,
+//       'date', a.answer_date,
+//       'answerer_name', a.answerer_name,
+//       'helpfulness', a.helpful,
+//       'photos', '[]'
+//     )) FILTER (WHERE a.answer_id IS NOT NULL), '{}'::JSONB)
+// )
 // FROM questions q
 // LEFT JOIN answers a
 // ON q.question_id = a.question_id
-// LEFT JOIN answer_photos ap
-// ON ap.answer_id = a.answer_id
-// WHERE q.product_id = 3 AND a.answer_id IS NOT NULL
+// WHERE q.product_id = 3
 // AND q.reported = false
-// GROUP BY q.question_id
-// ORDER BY q.question_id
-// LIMIT 3
-// OFFSET 1)
-// SELECT jsonb_pretty(jsonb_build_object(
-//   'product_id', 3,
-//   'results', jsonb_agg(questionsJSON.*)))
-// FROM questionsJSON;
+// GROUP BY q.question_id, a.answer_id;
 /*
 
 //get answers data

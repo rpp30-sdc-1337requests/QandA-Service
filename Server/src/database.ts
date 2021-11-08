@@ -40,23 +40,23 @@ export const getQuestions = (productID: string, count: number,) => {
 }
 
 export const getAnswers = (questionID: string, count: number) => {
-  const queryString = `SELECT a.answer_id, a.answer_body AS body, a.answer_date AS date, a.answerer_name AS name, a.helpful AS helpfulness,
-    (CASE WHEN string_agg(ap.url, ',') IS NOT NULL THEN
-      jsonb_agg(
-        jsonb_build_object(
-          'id', ap.photo_id,
-          'url', ap.url
-        )
+  const queryString =
+  `SELECT a.answer_id, a.answer_body AS body, a.answer_date AS date, a.answerer_name AS name, a.helpful AS helpfulness,
+  (COALESCE (
+    jsonb_agg(
+      jsonb_build_object(
+        'id', ap.photo_id,
+        'url', ap.url
       )
-    ELSE jsonb_build_array()
-    END) AS photos
-    FROM answers a
-    LEFT JOIN answer_photos ap
-    ON ap.answer_id = a.answer_id
-    WHERE a.reported = false AND a.question_id = $1
-    GROUP BY a.answer_id
-    ORDER BY a.answer_id
-    LIMIT $2;`
+    ) FILTER (WHERE ap.photo_id IS NOT NULL),
+'[]'::JSONB)) AS photos
+  FROM answers a
+  LEFT JOIN answer_photos ap
+  ON ap.answer_id = a.answer_id
+  WHERE a.reported = false AND a.question_id = $1
+  GROUP BY a.answer_id, ap.url
+  ORDER BY a.answer_id
+  LIMIT $2;`
   return client.query(queryString, [questionID, count])
 }
 

@@ -4,4 +4,4 @@ COPY . /qandaService
 
 WORKDIR /qandaService
 
-CMD node /Server/dist/QAserver.js
+CMD node ./Server/dist/QAserver.js

@@ -8,12 +8,13 @@ import {
   putAnswerReport,
   putAnswerHelpful
 } from './database';
+
 import express, { json, Request, Response } from 'express';
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 app.use(cors({
-    origin: 'http://localhost:3000'
+  origin: 'http://localhost:3000'
 }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json())
@@ -23,29 +24,35 @@ app.use(bodyParser.json())
 
 //GET REQUESTS
 app.get('/qa/questions', (req: Request, res: Response) => {
-  // console.log('req query', req.query);
   let count = req.query.count || 5;
-  let page = req.query.page || 1;
-  let product_id = String(req.query.product_id);
+  // let page = req.query.page || 1;
+  let product_id = req.query.product_id;
   getQuestions(product_id as string, count as number)
-    .then(questions => {
-      // console.log('this is questions in server', questions)
-      res.json(questions)
+    .then((questions: any) => {
+      const result = {
+        product_id,
+        results: questions.rows
+      }
+      res.status(200).json(result);
     })
-    .catch(err => {
-      console.log(err)
+    .catch((err: any) => {
       res.send(err)
     });
 })
 
 app.get('/qa/questions/:question_id/answers', (req: Request, res: Response) => {
-  console.log('req stuff', req.params, req.query)
-  let question_id  = req.params.question_id;
+  let question_id = req.params.question_id;
   let count = req.query.page || 5;
   getAnswers(question_id as string, count as number)
-    .then (answers => {
+    .then((answers: any) => {
       // console.log('we are responding with answers', answers)
-      res.json(answers)
+      const result = {
+        question: question_id,
+        page: 1,
+        count,
+        results: answers.rows
+      }
+      res.status(200).json(result)
     })
     .catch((err: Error) => {
       console.log(err)
@@ -55,39 +62,81 @@ app.get('/qa/questions/:question_id/answers', (req: Request, res: Response) => {
 
 //POST REQUESTS
 app.post('/qa/questions', (req: Request, res: Response) => {
-  console.log('hitting post on server', req.body)
+  // console.log('we are responding with questions', req.body)
   let { body, name, email, product_id } = req.body.data;
   postQuestion(product_id as number, body as string, name as string, email as string)
-    .then ((question: { command: string }) => {
-      console.log('we are responding with answers', question.command)
-      res.json(question.command)
+    .then((question: { command: string }) => {
+      res.status(201).send(question.command);
     })
     .catch((err: Error) => {
-      console.log(err)
-      res.end(err)
+      console.log(err);
+      res.sendStatus(500);
     })
 })
 
 app.post('/qa/questions/:question_id/answers', (req: Request, res: Response) => {
-  console.log('req body', req.body, req.params)
-  let { body, name, email } = req.body.data;
+  // console.log('we are responding with answers', req.body, req.params)
+  let { body, name, email } = req.body;
   let { question_id } = req.params;
-  let photos: string = 'fakeURL';
+  let photos = req.body.photos[0];
   postAnswer(question_id, body, name, email, photos)
-    .then ((question: { command: string }) => {
-      console.log('we are responding with answers', question)
-      res.json(question)
+    .then((question: { command: string }) => {
+      res.status(201).send(question.command)
     })
     .catch((err: Error) => {
       console.log(err)
+      res.sendStatus(500);
     })
 })
 
-//PUT REQUESTS
+//PUT REQUESTS HELPFUL
 app.put('/qa/questions/:question_id/helpful', (req: Request, res: Response) => {
-  const qHelpful = putQuestionHelpful(req.params.question_id);
-  console.log('is this helpful', qHelpful)
-  res.send(qHelpful);
+  putQuestionHelpful(req.params.question_id)
+    .then(posted => {
+      // console.log('is this helpful', posted)
+      res.status(201).send(posted.command);
+    })
+    .catch(err => {
+      console.log(err);
+      res.sendStatus(500);
+    })
+})
+
+app.put('/qa/answers/:answer_id/helpful', (req: Request, res: Response) => {
+  putAnswerHelpful(req.params.answer_id)
+    .then(posted => {
+      // console.log('is this helpful answer', posted.command)
+      res.status(500).send(posted.command);
+    })
+    .catch(err => {
+      console.log(err);
+      res.sendStatus(500);
+    })
+})
+
+//PUT REQUESTS REPORT
+app.put('/qa/questions/:question_id/report', (req: Request, res: Response) => {
+  putQuestionReport(req.params.question_id)
+    .then(posted => {
+      // console.log('is this report', posted)
+      res.status(500).send(posted.command);
+    })
+    .catch(err => {
+      console.log(err);
+      res.sendStatus(500);
+    })
+})
+
+app.put('/qa/answers/:answer_id/report', (req: Request, res: Response) => {
+  putAnswerReport(req.params.answer_id)
+    .then(posted => {
+      // console.log('is this report', posted)
+      res.status(500).send(posted.command);
+    })
+    .catch(err => {
+      console.log(err);
+      res.sendStatus(500);
+    })
 })
 
 

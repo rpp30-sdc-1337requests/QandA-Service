@@ -1,7 +1,7 @@
 const { Client } = require('pg');
 const client = new Client({
-  user: 'Jeremiah',
-  host: 'localhost',
+  user: 'postgres',
+  host: 'ec2-54-163-44-68.compute-1.amazonaws.com',
   database: 'qanda',
   password: '',
   port: 5432
@@ -18,7 +18,7 @@ export const getQuestions = (productID: string, count: number) => {
       jsonb_object_agg( a.answer_id,
       jsonb_build_object(
         'id', a.answer_id,
-        'body', a.answer_body,
+        'body', a.answer_body,N
         'date', a.answer_date,
         'answerer_name', a.answerer_name,
         'helpfulness', a.helpful,

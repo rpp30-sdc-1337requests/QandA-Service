@@ -14,7 +14,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 app.use(cors({
-  origin: 'http://localhost:3000'
+  origin: '*'
 }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json())
@@ -36,6 +36,7 @@ app.get('/qa/questions', (req: Request, res: Response) => {
       res.status(200).json(result);
     })
     .catch((err: any) => {
+      console.log(err);
       res.send(err)
     });
 })
@@ -138,8 +139,7 @@ app.put('/qa/answers/:answer_id/report', (req: Request, res: Response) => {
       res.sendStatus(500);
     })
 })
-
-
+//---------------------
 app.listen(8080, () => {
   console.log('We are connected to Q&A Server');
 });

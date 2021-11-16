@@ -1,10 +1,10 @@
 const { Client } = require('pg');
 const client = new Client({
-  user: 'postgres',
-  host: 'ec2-54-163-44-68.compute-1.amazonaws.com',
+  user: 'ubuntu',
+  host: '3.95.241.175',
   database: 'qanda',
-  password: '',
-  port: 5432
+  password: 'ubuntu',
+  port: 5433
 });
 
 client.connect();
@@ -18,7 +18,7 @@ export const getQuestions = (productID: string, count: number) => {
       jsonb_object_agg( a.answer_id,
       jsonb_build_object(
         'id', a.answer_id,
-        'body', a.answer_body,N
+        'body', a.answer_body,
         'date', a.answer_date,
         'answerer_name', a.answerer_name,
         'helpfulness', a.helpful,
@@ -33,7 +33,6 @@ export const getQuestions = (productID: string, count: number) => {
   WHERE q.product_id = $1 AND q.reported = false
   GROUP BY q.question_id
   LIMIT $2;`
-
   return client.query(queryString, [productID, count])
 }
 

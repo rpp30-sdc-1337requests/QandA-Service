@@ -12,11 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.putAnswerReport = exports.putAnswerHelpful = exports.putQuestionReport = exports.putQuestionHelpful = exports.postAnswer = exports.postQuestion = exports.getAnswers = exports.getQuestions = void 0;
 const { Client } = require('pg');
 const client = new Client({
-    user: 'Jeremiah',
-    host: 'localhost',
+    user: 'ubuntu',
+    host: '3.95.241.175',
     database: 'qanda',
-    password: '',
-    port: 5432
+    password: 'ubuntu',
+    port: 5433
 });
 client.connect();
 const getQuestions = (productID, count) => {

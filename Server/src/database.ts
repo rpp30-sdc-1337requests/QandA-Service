@@ -63,16 +63,20 @@ export const postQuestion = (productID: number, body: string, name: string, emai
   return client.query(queryString, [productID, body, name, email]);
 }
 
+export const postAnswer = (questionID: string, body: string, name: string, email: string) => {
+  const queryString = 'INSERT INTO answers(question_id, answer_body, answerer_name, answerer_email) \
+                      VALUES ($1, $2, $3, $4) \
+                      RETURNING answer_id'
 
-export const postAnswer = (questionID: string, body: string, name: string, email: string, photos: string) => {
-  const queryString = 'WITH insAnswer AS (\
-                        INSERT INTO answers(question_id, answer_body, answerer_name, answerer_email) \
-                        VALUES ($1, $2, $3, $4) \
-                        RETURNING answer_id\
-                      ) \
-                      INSERT INTO answer_photos(answer_id, url)\
-                      VALUES ((SELECT answer_id FROM insAnswer), $5);'
-  return client.query(queryString, [questionID, body, name, email, photos])
+                      // INSERT INTO answer_photos(answer_id, url)\
+                      // VALUES ((SELECT answer_id FROM insAnswer), $5);'
+  return client.query(queryString, [questionID, body, name, email])
+}
+
+export const postAnswerPhotos = (answer_id: string, photos: string[]) => {
+  const queryString = 'INSERT INTO answer_photos(answer_id, url)\
+                       VALUES ($1, $2);'
+  return client.query(queryString, [answer_id, photos]);
 }
 
 export const putQuestionHelpful = async (questionID: string) => {
@@ -103,6 +107,7 @@ module.exports = {
   getAnswers,
   postQuestion,
   postAnswer,
+  postAnswerPhotos,
   putQuestionReport,
   putQuestionHelpful,
   putAnswerReport,

@@ -68,22 +68,31 @@ app.post('/qa/questions', (req, res) => {
     });
 });
 app.post('/qa/questions/:question_id/answers', (req, res) => {
-    // console.log('we are responding with answers', req.body, req.params)
-    let { body, name, email } = req.body;
+    console.log('we are responding with answers', req.body, req.params);
+    let { body, name, email, photos } = req.body.data;
     let { question_id } = req.params;
-    let photos = req.body.photos[0];
-    (0, database_1.postAnswer)(question_id, body, name, email, photos)
-        .then((question) => {
-        res.status(201).send(question.command);
+    // let photos = req.body.data.photos;
+    console.log('this is insert photos', photos);
+    (0, database_1.postAnswer)(question_id, body, name, email)
+        .then((answer) => {
+        let answer_id = answer.rows[0].answer_id;
+        console.log('this is response', answer_id, photos);
+        let photoAdds = photos.map((photo) => {
+            return (0, database_1.postAnswerPhotos)(answer_id, photo);
+        });
+        return Promise.all(photoAdds);
+    })
+        .then((success) => {
+        res.status(201).send('INSERT');
     })
         .catch((err) => {
-        // console.log(err)
+        console.log(err);
         res.sendStatus(500);
     });
 });
 //PUT REQUESTS HELPFUL
 app.put('/qa/questions/:question_id/helpful', (req, res) => {
-    console.log('is this helpful', req.params);
+    // console.log('is this helpful', req.params)
     (0, database_1.putQuestionHelpful)(req.params.question_id)
         .then(posted => {
         res.status(201).send(posted.command);

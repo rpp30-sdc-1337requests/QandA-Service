@@ -6,10 +6,11 @@ import {
   putQuestionReport,
   putQuestionHelpful,
   putAnswerReport,
-  putAnswerHelpful
+  putAnswerHelpful,
+  postAnswerPhotos
 } from './database';
 
-import express, { json, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -19,8 +20,10 @@ app.use(cors({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json())
 
-// We want all of our requests from the FEC API to hit this server and return
-// required data from the server
+// loader.io
+app.get('/loaderio-36ba50263860d4091ce07f969ddd6292/', (req: Request, res: Response) => {
+    res.status(200).send('loaderio-36ba50263860d4091ce07f969ddd6292')
+})
 
 //GET REQUESTS
 app.get('/qa/questions', (req: Request, res: Response) => {
@@ -36,7 +39,7 @@ app.get('/qa/questions', (req: Request, res: Response) => {
       res.status(200).json(result);
     })
     .catch((err: any) => {
-      console.log(err);
+      // console.log(err);
       res.send(err)
     });
 })
@@ -56,7 +59,7 @@ app.get('/qa/questions/:question_id/answers', (req: Request, res: Response) => {
       res.status(200).json(result)
     })
     .catch((err: Error) => {
-      console.log(err)
+      // console.log(err)
       res.end(err)
     })
 })
@@ -70,19 +73,26 @@ app.post('/qa/questions', (req: Request, res: Response) => {
       res.status(201).send(question.command);
     })
     .catch((err: Error) => {
-      console.log(err);
+      // console.log(err);
       res.sendStatus(500);
     })
 })
 
 app.post('/qa/questions/:question_id/answers', (req: Request, res: Response) => {
   // console.log('we are responding with answers', req.body, req.params)
-  let { body, name, email } = req.body;
+  let { body, name, email, photos } = req.body.data;
   let { question_id } = req.params;
-  let photos = req.body.photos[0];
-  postAnswer(question_id, body, name, email, photos)
-    .then((question: { command: string }) => {
-      res.status(201).send(question.command)
+  postAnswer(question_id, body, name, email)
+    .then((answer: { command: string, rows: any }) => {
+      let answer_id = answer.rows[0].answer_id;
+      // console.log('this is response', answer_id, photos);
+      let photoAdds = photos.map((photo: any) => {
+        return postAnswerPhotos(answer_id, photo);
+      })
+      return Promise.all(photoAdds);
+    })
+    .then((success: any) => {
+      res.status(201).send('INSERT')
     })
     .catch((err: Error) => {
       console.log(err)
@@ -92,13 +102,13 @@ app.post('/qa/questions/:question_id/answers', (req: Request, res: Response) => 
 
 //PUT REQUESTS HELPFUL
 app.put('/qa/questions/:question_id/helpful', (req: Request, res: Response) => {
+  // console.log('is this helpful', req.params)
   putQuestionHelpful(req.params.question_id)
     .then(posted => {
-      // console.log('is this helpful', posted)
       res.status(201).send(posted.command);
     })
     .catch(err => {
-      console.log(err);
+      // console.log(err);
       res.sendStatus(500);
     })
 })
@@ -110,7 +120,7 @@ app.put('/qa/answers/:answer_id/helpful', (req: Request, res: Response) => {
       res.status(500).send(posted.command);
     })
     .catch(err => {
-      console.log(err);
+      // console.log(err);
       res.sendStatus(500);
     })
 })
@@ -123,7 +133,7 @@ app.put('/qa/questions/:question_id/report', (req: Request, res: Response) => {
       res.status(500).send(posted.command);
     })
     .catch(err => {
-      console.log(err);
+      // console.log(err);
       res.sendStatus(500);
     })
 })
@@ -135,7 +145,7 @@ app.put('/qa/answers/:answer_id/report', (req: Request, res: Response) => {
       res.status(500).send(posted.command);
     })
     .catch(err => {
-      console.log(err);
+      // console.log(err);
       res.sendStatus(500);
     })
 })

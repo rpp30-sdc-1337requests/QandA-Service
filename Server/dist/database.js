@@ -9,13 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.putAnswerReport = exports.putAnswerHelpful = exports.putQuestionReport = exports.putQuestionHelpful = exports.postAnswer = exports.postQuestion = exports.getAnswers = exports.getQuestions = void 0;
+exports.putAnswerReport = exports.putAnswerHelpful = exports.putQuestionReport = exports.putQuestionHelpful = exports.postAnswerPhotos = exports.postAnswer = exports.postQuestion = exports.getAnswers = exports.getQuestions = void 0;
+require('dotenv').config();
 const { Client } = require('pg');
 const client = new Client({
-    user: 'ubuntu',
-    host: '3.95.241.175',
-    database: 'qanda',
-    password: 'ubuntu',
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB,
+    password: process.env.DB_PASS,
     port: 5433
 });
 client.connect();
@@ -70,17 +71,21 @@ const postQuestion = (productID, body, name, email) => {
     return client.query(queryString, [productID, body, name, email]);
 };
 exports.postQuestion = postQuestion;
-const postAnswer = (questionID, body, name, email, photos) => {
-    const queryString = 'WITH insAnswer AS (\
-                        INSERT INTO answers(question_id, answer_body, answerer_name, answerer_email) \
-                        VALUES ($1, $2, $3, $4) \
-                        RETURNING answer_id\
-                      ) \
-                      INSERT INTO answer_photos(answer_id, url)\
-                      VALUES ((SELECT answer_id FROM insAnswer), $5);';
-    return client.query(queryString, [questionID, body, name, email, photos]);
+const postAnswer = (questionID, body, name, email) => {
+    const queryString = 'INSERT INTO answers(question_id, answer_body, answerer_name, answerer_email) \
+                      VALUES ($1, $2, $3, $4) \
+                      RETURNING answer_id';
+    // INSERT INTO answer_photos(answer_id, url)\
+    // VALUES ((SELECT answer_id FROM insAnswer), $5);'
+    return client.query(queryString, [questionID, body, name, email]);
 };
 exports.postAnswer = postAnswer;
+const postAnswerPhotos = (answer_id, photos) => {
+    const queryString = 'INSERT INTO answer_photos(answer_id, url)\
+                       VALUES ($1, $2);';
+    return client.query(queryString, [answer_id, photos]);
+};
+exports.postAnswerPhotos = postAnswerPhotos;
 const putQuestionHelpful = (questionID) => __awaiter(void 0, void 0, void 0, function* () {
     const queryString = 'UPDATE questions SET helpful = helpful + 1 WHERE questions.question_id = $1;';
     return client.query(queryString, [questionID]);
@@ -107,6 +112,7 @@ module.exports = {
     getAnswers: exports.getAnswers,
     postQuestion: exports.postQuestion,
     postAnswer: exports.postAnswer,
+    postAnswerPhotos: exports.postAnswerPhotos,
     putQuestionReport: exports.putQuestionReport,
     putQuestionHelpful: exports.putQuestionHelpful,
     putAnswerReport: exports.putAnswerReport,

@@ -1,16 +1,16 @@
+require('dotenv').config();
 const { Client } = require('pg');
 const client = new Client({
-  user: 'ubuntu',
-  host: '3.95.241.175',
-  database: 'qanda',
-  password: 'ubuntu',
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB,
+  password: process.env.DB_PASS,
   port: 5433
 });
 
 client.connect();
 
 export const getQuestions = (productID: string, count: number) => {
-
   const queryString =
   `SELECT q.question_id, question_body, question_date, asker_name, q.reported, q.helpful,
   (

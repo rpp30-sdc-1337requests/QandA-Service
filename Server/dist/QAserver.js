@@ -13,8 +13,10 @@ app.use(cors({
 }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// We want all of our requests from the FEC API to hit this server and return
-// required data from the server
+// loader.io
+app.get('/loaderio-36ba50263860d4091ce07f969ddd6292/', (req, res) => {
+    res.status(200).send('loaderio-36ba50263860d4091ce07f969ddd6292');
+});
 //GET REQUESTS
 app.get('/qa/questions', (req, res) => {
     let count = req.query.count || 5;
@@ -29,7 +31,7 @@ app.get('/qa/questions', (req, res) => {
         res.status(200).json(result);
     })
         .catch((err) => {
-        console.log(err);
+        // console.log(err);
         res.send(err);
     });
 });
@@ -48,7 +50,7 @@ app.get('/qa/questions/:question_id/answers', (req, res) => {
         res.status(200).json(result);
     })
         .catch((err) => {
-        console.log(err);
+        // console.log(err)
         res.end(err);
     });
 });
@@ -61,7 +63,7 @@ app.post('/qa/questions', (req, res) => {
         res.status(201).send(question.command);
     })
         .catch((err) => {
-        console.log(err);
+        // console.log(err);
         res.sendStatus(500);
     });
 });
@@ -75,19 +77,19 @@ app.post('/qa/questions/:question_id/answers', (req, res) => {
         res.status(201).send(question.command);
     })
         .catch((err) => {
-        console.log(err);
+        // console.log(err)
         res.sendStatus(500);
     });
 });
 //PUT REQUESTS HELPFUL
 app.put('/qa/questions/:question_id/helpful', (req, res) => {
+    console.log('is this helpful', req.params);
     (0, database_1.putQuestionHelpful)(req.params.question_id)
         .then(posted => {
-        // console.log('is this helpful', posted)
         res.status(201).send(posted.command);
     })
         .catch(err => {
-        console.log(err);
+        // console.log(err);
         res.sendStatus(500);
     });
 });
@@ -98,7 +100,7 @@ app.put('/qa/answers/:answer_id/helpful', (req, res) => {
         res.status(500).send(posted.command);
     })
         .catch(err => {
-        console.log(err);
+        // console.log(err);
         res.sendStatus(500);
     });
 });
@@ -110,7 +112,7 @@ app.put('/qa/questions/:question_id/report', (req, res) => {
         res.status(500).send(posted.command);
     })
         .catch(err => {
-        console.log(err);
+        // console.log(err);
         res.sendStatus(500);
     });
 });
@@ -121,7 +123,7 @@ app.put('/qa/answers/:answer_id/report', (req, res) => {
         res.status(500).send(posted.command);
     })
         .catch(err => {
-        console.log(err);
+        // console.log(err);
         res.sendStatus(500);
     });
 });

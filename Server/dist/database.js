@@ -10,12 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.putAnswerReport = exports.putAnswerHelpful = exports.putQuestionReport = exports.putQuestionHelpful = exports.postAnswer = exports.postQuestion = exports.getAnswers = exports.getQuestions = void 0;
+require('dotenv').config();
 const { Client } = require('pg');
 const client = new Client({
-    user: 'ubuntu',
-    host: '3.95.241.175',
-    database: 'qanda',
-    password: 'ubuntu',
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB,
+    password: process.env.DB_PASS,
     port: 5433
 });
 client.connect();

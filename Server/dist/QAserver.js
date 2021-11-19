@@ -68,15 +68,13 @@ app.post('/qa/questions', (req, res) => {
     });
 });
 app.post('/qa/questions/:question_id/answers', (req, res) => {
-    console.log('we are responding with answers', req.body, req.params);
+    // console.log('we are responding with answers', req.body, req.params)
     let { body, name, email, photos } = req.body.data;
     let { question_id } = req.params;
-    // let photos = req.body.data.photos;
-    console.log('this is insert photos', photos);
     (0, database_1.postAnswer)(question_id, body, name, email)
         .then((answer) => {
         let answer_id = answer.rows[0].answer_id;
-        console.log('this is response', answer_id, photos);
+        // console.log('this is response', answer_id, photos);
         let photoAdds = photos.map((photo) => {
             return (0, database_1.postAnswerPhotos)(answer_id, photo);
         });

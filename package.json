@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest --coverage --detectOpenHandles",
     "start": "nodemon ./Server/dist/QAserver.js",
-    "build": "tsc -p ."
+    "build": "tsc -w -p ."
   },
   "keywords": [],
   "author": "",

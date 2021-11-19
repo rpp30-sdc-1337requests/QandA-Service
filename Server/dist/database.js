@@ -75,8 +75,6 @@ const postAnswer = (questionID, body, name, email) => {
     const queryString = 'INSERT INTO answers(question_id, answer_body, answerer_name, answerer_email) \
                       VALUES ($1, $2, $3, $4) \
                       RETURNING answer_id';
-    // INSERT INTO answer_photos(answer_id, url)\
-    // VALUES ((SELECT answer_id FROM insAnswer), $5);'
     return client.query(queryString, [questionID, body, name, email]);
 };
 exports.postAnswer = postAnswer;

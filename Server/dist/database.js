@@ -11,8 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.putAnswerReport = exports.putAnswerHelpful = exports.putQuestionReport = exports.putQuestionHelpful = exports.postAnswerPhotos = exports.postAnswer = exports.postQuestion = exports.getAnswers = exports.getQuestions = void 0;
 require('dotenv').config();
-const { Client } = require('pg');
-const client = new Client({
+const { Client, Pool } = require('pg');
+const client = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB,
@@ -32,10 +32,10 @@ const getQuestions = (productID, count) => {
         'answerer_name', a.answerer_name,
         'helpfulness', a.helpful,
         'photos', '[]'
-      )
-      )FILTER (WHERE a.answer_id IS NOT NULL AND a.reported = false),
-      '{}'::JSONB)
-  ) answers
+        )
+        )FILTER (WHERE a.answer_id IS NOT NULL AND a.reported = false),
+        '{}'::JSONB)
+    ) answers
   FROM questions q
   LEFT JOIN answers a
   ON q.question_id = a.question_id

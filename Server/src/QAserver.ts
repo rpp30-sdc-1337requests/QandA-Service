@@ -9,21 +9,47 @@ import {
   putAnswerHelpful,
   postAnswerPhotos
 } from './database';
-
 import express, { Request, Response } from 'express';
+
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
-app.use(cors({
-  origin: '*'
-}));
+const path = require('path');
+
+// const redis = require("redis");
+// const redisClient = redis.createClient();
+
+// redisClient.on("error", function(error: any) {
+//   console.error(error);
+// });
+
+app.use(cors({ origin: '*' }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json())
 
 // loader.io
-app.get('/loaderio-36ba50263860d4091ce07f969ddd6292/', (req: Request, res: Response) => {
-    res.status(200).send('loaderio-36ba50263860d4091ce07f969ddd6292')
+app.get('/loaderio-aa3bce7f8bf5c5a88803f574aaf89ba7/', (req: Request, res: Response) => {
+  // var options = {
+  //   root: path.join(__dirname)
+  // };
+  // res.sendFile('../../loaderio-f03ad0afb4e6b3d782900cd25abfa5f7.txt', options, (err) => {
+  //   if (err) {console.log(err)}
+  //   else {console.log('sent')}
+  // });
+    res.status(200).send('loaderio-aa3bce7f8bf5c5a88803f574aaf89ba7')
 })
+
+// redis cache
+// const redisCache = (req: Request, res: Response) => {
+//   let product_id = req.query.product_id;
+//   redisClient.get(product_id, (err: Error, data: any) => {
+//     if (err) {
+//       throw err;
+//     } else {
+//       res.status(200).json(data);
+//     }
+//   })
+// }
 
 //GET REQUESTS
 app.get('/qa/questions', (req: Request, res: Response) => {
@@ -36,11 +62,12 @@ app.get('/qa/questions', (req: Request, res: Response) => {
         product_id,
         results: questions.rows
       }
+      // redisClient.setex(product_id, 75, result);
       res.status(200).json(result);
     })
     .catch((err: any) => {
       // console.log(err);
-      res.send(err)
+      res.end(err)
     });
 })
 
@@ -117,11 +144,11 @@ app.put('/qa/answers/:answer_id/helpful', (req: Request, res: Response) => {
   putAnswerHelpful(req.params.answer_id)
     .then(posted => {
       // console.log('is this helpful answer', posted.command)
-      res.status(500).send(posted.command);
+      res.status(201).send(posted.command);
     })
-    .catch(err => {
+    .catch((err: any) => {
       // console.log(err);
-      res.sendStatus(500);
+      res.status(500).send(err);
     })
 })
 

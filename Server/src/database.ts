@@ -1,7 +1,7 @@
 require('dotenv').config();
 
-const { Client } = require('pg');
-const client = new Client({
+const { Client, Pool } = require('pg');
+const client = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB,
@@ -24,10 +24,10 @@ export const getQuestions = (productID: string, count: number) => {
         'answerer_name', a.answerer_name,
         'helpfulness', a.helpful,
         'photos', '[]'
-      )
-      )FILTER (WHERE a.answer_id IS NOT NULL AND a.reported = false),
-      '{}'::JSONB)
-  ) answers
+        )
+        )FILTER (WHERE a.answer_id IS NOT NULL AND a.reported = false),
+        '{}'::JSONB)
+    ) answers
   FROM questions q
   LEFT JOIN answers a
   ON q.question_id = a.question_id

@@ -16,12 +16,12 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 
-// const redis = require("redis");
-// const redisClient = redis.createClient();
+const redis = require("redis");
+const redisClient = redis.createClient();
 
-// redisClient.on("error", function(error: any) {
-//   console.error(error);
-// });
+redisClient.on("error", function(error: any) {
+  console.error(error);
+});
 
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -29,30 +29,25 @@ app.use(bodyParser.json())
 
 // loader.io
 app.get('/loaderio-aa3bce7f8bf5c5a88803f574aaf89ba7/', (req: Request, res: Response) => {
-  // var options = {
-  //   root: path.join(__dirname)
-  // };
-  // res.sendFile('../../loaderio-f03ad0afb4e6b3d782900cd25abfa5f7.txt', options, (err) => {
-  //   if (err) {console.log(err)}
-  //   else {console.log('sent')}
-  // });
     res.status(200).send('loaderio-aa3bce7f8bf5c5a88803f574aaf89ba7')
 })
 
 // redis cache
-// const redisCache = (req: Request, res: Response) => {
-//   let product_id = req.query.product_id;
-//   redisClient.get(product_id, (err: Error, data: any) => {
-//     if (err) {
-//       throw err;
-//     } else {
-//       res.status(200).json(data);
-//     }
-//   })
-// }
+const redisCache = (req: Request, res: Response, next: any) => {
+  let product_id = req.query.product_id;
+  redisClient.get(product_id, (err: Error, data: any) => {
+    if (err) { throw err; }
+    if (data != null) {
+      console.log('it was cached')
+      res.send(JSON.parse(data));
+    } else {
+      next();
+    }
+  })
+}
 
 //GET REQUESTS
-app.get('/qa/questions', (req: Request, res: Response) => {
+app.get('/qa/questions', redisCache, (req: Request, res: Response) => {
   let count = req.query.count || 5;
   // let page = req.query.page || 1;
   let product_id = req.query.product_id;
@@ -62,12 +57,12 @@ app.get('/qa/questions', (req: Request, res: Response) => {
         product_id,
         results: questions.rows
       }
-      // redisClient.setex(product_id, 75, result);
+      redisClient.set(product_id, JSON.stringify(result));
       res.status(200).json(result);
     })
     .catch((err: any) => {
-      // console.log(err);
-      res.end(err)
+      console.error(err);
+      res.send(err)
     });
 })
 

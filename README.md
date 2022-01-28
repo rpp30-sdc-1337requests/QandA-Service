@@ -16,6 +16,9 @@ deployed on AWS EC2 instances.
 * Loader.io
 * Jest
 
+These are a couple screenshots of k6 and loader.io stress testing results. There were dozens if not over a hundred iterations of
+this testing.
+
 <div align="center">
   <img src="https://github.com/rpp30-sdc-1337requests/qandaService/blob/master/screenshots/loaderIO.png" width="300px"</img>
   <img src="https://github.com/rpp30-sdc-1337requests/qandaService/blob/master/screenshots/k6testing.png" width="600px"</img>

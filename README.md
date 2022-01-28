@@ -16,6 +16,11 @@ deployed on AWS EC2 instances.
 * Loader.io
 * Jest
 
+<div align="center">
+<img src="https://github.com/rpp30-sdc-1337requests/qandaService/tree/master/screenshots/loaderIO.png" width="400px"></img>
+<img src="https://github.com/rpp30-sdc-1337requests/qandaService/tree/master/screenshots/k6testing" width="400px"></img>
+</div>
+
 ## Reflections
 This was one of the more challenging projects I ever worked on. There were times when I was knee deep in obscure Linux commands on my EC2 
 ubuntu instance trying to map ports from my service to my database. Other days I was deep in the Postgres JSON aggregation methods

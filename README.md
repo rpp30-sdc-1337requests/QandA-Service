@@ -17,8 +17,8 @@ deployed on AWS EC2 instances.
 * Jest
 
 <div align="center">
-<img src="https://github.com/rpp30-sdc-1337requests/qandaService/tree/master/screenshots/loaderIO.png" width="400px"></img>
-<img src="https://github.com/rpp30-sdc-1337requests/qandaService/tree/master/screenshots/k6testing" width="400px"></img>
+  <img src="https://github.com/rpp30-sdc-1337requests/qandaService/tree/master/screenshots/loaderIO.png" width="400px"></img>
+  <img src="https://github.com/rpp30-sdc-1337requests/qandaService/tree/master/screenshots/k6testing.png" width="400px"></img>
 </div>
 
 ## Reflections

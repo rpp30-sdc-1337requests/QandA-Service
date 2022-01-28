@@ -16,7 +16,7 @@ deployed on AWS EC2 instances.
 * Loader.io
 * Jest
 
-![loaderIO](https://github.com/rpp30-sdc-1337requests/qandaService/tree/master/screenshots/loaderIO.png)
+![loaderIO](../screenshots/loaderIO.png)
 
 <div align="center">
   <img src="https://github.com/rpp30-sdc-1337requests/qandaService/tree/master/screenshots/loaderIO.png" width="400px"</img>

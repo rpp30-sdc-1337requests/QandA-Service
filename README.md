@@ -16,6 +16,7 @@ deployed on AWS EC2 instances.
 * Loader.io
 * Jest
 
+## Iterative Stress and Performance Testing
 These are a couple screenshots of k6 and loader.io stress testing results. There were dozens if not over a hundred iterations of
 this testing.
 
